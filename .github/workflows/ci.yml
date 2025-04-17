@@ -3,6 +3,7 @@ name: CI on Pull Request
 on:
   pull_request:
     branches: [ "main" ]  # Kích hoạt khi có PR vào nhánh main
+    branches: [ "main" ]
 
 jobs:
   build-and-test:
@@ -11,7 +12,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Xóa các bước setup Node.js và npm install
-      # Thêm các bước build/test phù hợp với ngôn ngữ của bạn
-      - name: Run Tests (Python example)
-        run: pytest  # Thay bằng lệnh test của bạn
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm test  # Thay bằng lệnh test của bạn (vd: jest, pytest)
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"  # Chọn version Python phù hợp
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # Nếu có file requirements.txt
+          pip install pytest  # Cài đặt pytest
+
+      - name: Run Tests
+        run: pytest  # Hoặc lệnh cụ thể của bạn (vd: pytest tests/)
