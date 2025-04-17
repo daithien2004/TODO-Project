@@ -11,13 +11,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run Tests
-        run: npm test  # Thay bằng lệnh test của bạn (vd: jest, pytest)
+      # Xóa các bước setup Node.js và npm install
+      # Thêm các bước build/test phù hợp với ngôn ngữ của bạn
+      - name: Run Tests (Python example)
+        run: pytest  # Thay bằng lệnh test của bạn
