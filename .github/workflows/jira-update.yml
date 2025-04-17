@@ -1,0 +1,37 @@
+name: Update Jira on PR Merge
+
+on:
+  pull_request:
+    types: [closed]  # Kích hoạt khi PR đóng
+
+jobs:
+  update-jira:
+    if: github.event.pull_request.merged == true  # Chỉ chạy khi PR merged
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract Issue Key
+        id: extract-issue
+        run: |
+          # Lấy Issue Key từ tên PR hoặc commit (vd: "TODO-1: Fix bug")
+          ISSUE_KEY=$(echo "${{ github.event.pull_request.title }}" | grep -oE '[A-Z]+-[0-9]+')
+          echo "ISSUE_KEY=$ISSUE_KEY" >> $GITHUB_OUTPUT
+
+      - name: Transition Jira Issue
+        if: steps.extract-issue.outputs.ISSUE_KEY != ''
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          ISSUE_KEY: ${{ steps.extract-issue.outputs.ISSUE_KEY }}
+        run: |
+          # Gọi API Jira để chuyển trạng thái issue sang "Done"
+          curl --request POST \
+            --url "$JIRA_BASE_URL/rest/api/3/issue/$ISSUE_KEY/transitions" \
+            --user "$JIRA_EMAIL:$JIRA_TOKEN" \
+            --header "Accept: application/json" \
+            --header "Content-Type: application/json" \
+            --data '{
+              "transition": {
+                "id": "11"  # Thay bằng ID transition phù hợp (vd: 31 = Done)
+              }
+            }'
