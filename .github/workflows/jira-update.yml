@@ -16,6 +16,16 @@ jobs:
           ISSUE_KEY=$(echo "${{ github.event.pull_request.title }}" | grep -oE '[A-Z]+-[0-9]+')
           echo "ISSUE_KEY=$ISSUE_KEY" >> $GITHUB_OUTPUT
 
+      - name: Notify Slack
+        if: steps.extract-issue.outputs.ISSUE_KEY != ''
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          ISSUE_KEY: ${{ steps.extract-issue.outputs.ISSUE_KEY }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"🚀 Issue $ISSUE_KEY đã được đóng thành công! Xem tại: ${{ secrets.JIRA_BASE_URL }}/browse/$ISSUE_KEY\"}" \
+            $SLACK_WEBHOOK
+
       - name: Transition Jira Issue
         if: steps.extract-issue.outputs.ISSUE_KEY != ''
         env:
